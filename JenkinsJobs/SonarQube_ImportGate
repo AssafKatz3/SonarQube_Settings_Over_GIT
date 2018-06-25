@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.11.2">
+  <actions/>
+  <description>Import Quality Gate to SonarQube:&#xd;
+&#xd;
+* The input file will taken from the directiory &quot;GATES_DIRECTORY&quot;, and under the name &quot;INPUT_FILENAME&quot;.&#xd;
+&#xd;
+* If you use token, pass the parameter &quot;TOKEN&quot;, and leave the parameters &quot;USERNAME&quot; and &quot;PASSWORD&quot; empty.&#xd;
+* If you use username and password, pass the parameters &quot;USERNAME&quot; and &quot;PASSWORD&quot;, and leave the parameter &quot;TOKEN&quot; empty.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>BRANCH_NAME</name>
+          <description>example: &quot;master&quot;.</description>
+          <defaultValue>master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_URL</name>
+          <description>this repository should contain the jenkinsfile and the project.</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SONARQUBE_SERVER</name>
+          <description>example: &quot;http://localhost:9000&quot;.</description>
+          <defaultValue>http://localhost:9000</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GATES_DIRECTORY</name>
+          <description>name of the directory where the quality gate is save.</description>
+          <defaultValue>sonar-gates</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>INPUT_FILENAME</name>
+          <description>name of the file where the quality gate is save.</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TOKEN</name>
+          <description>user token.
+* note: fill this parameter only of you leave the parameters &quot;USERNAME&quot; and &quot;PASSWORD&quot; empty.	</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>USERNAME</name>
+          <description>user name.
+* note: fill this parameter only of you also fill the parameter &quot;PASSWORD&quot; and leave the parameter &quot;TOKEN&quot; empty.</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PASSWORD</name>
+          <description>password.
+* note: fill this parameter only of you also fill the parameter &quot;USERNAME&quot; and leave the parameter &quot;TOKEN&quot; empty.</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.41">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.0">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>${GIT_URL}</url>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>${BRANCH_NAME}</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="list"/>
+      <extensions/>
+    </scm>
+    <scriptPath>JenkinsFiles/jenkinsfile_SonarQube_ImportGate</scriptPath>
+    <lightweight>false</lightweight>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
