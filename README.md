@@ -8,9 +8,9 @@ Quality Profiles allows you to define the requirements from the project by defin
 
 SonarQube currently provides the ability to back up and restore Quality Profiles but not of Quality Gates. In addition, this option does not support integration with SCM tools (like Git).
 
-**The purpose of this project is to enable:**
-- *export* of Quality Profiles/Gates from SonarQube to Git.
-- *import* of Quality Profiles/Gates from Git to SonarQube.
+**The purpose of this project is to enable continuous configuration by:**
+- *Export* of Quality Profiles/Gates from SonarQube to Git.
+- *Import* of Quality Profiles/Gates from Git to SonarQube.
 
 **Project structure:**
 - The folder `vars` contains groovy scripts that use the existing SonarQube API to import/export profiles/gates.
@@ -229,6 +229,15 @@ To do this, you need to configure Jenkins and perform the following steps:
 - To use the Shared Library in a pipeline, add `@Library("sonarqubeLibrary")_` to the top of your JenkinsFile. <br/>
   For more examples, see the folder `JenkinsFiles`.
 
+**Use third party libraries:**
+- Our Groovy scripts use the @Grab annotation to add the following third pary libraries:
+  ```
+  @Grab(group = 'com.squareup.okio', module = 'okio', version = '1.9.0')
+  @Grab(group = 'com.squareup.okhttp3', module = 'okhttp', version = '3.4.1')
+  ```
+- Therefore, if you use a proxy - you need to add a grapeConfig.xml to your Jenkins.
+- For more explanation, see the following [link](https://tcollignon.github.io/2017/07/10/How-To-Use-third-party-libraries-in-Jenkins-Pipeline.html).
+
 ### Define Node
 **Introduction:** 
 - To use "Scripted Pipeline" (as shown in the folder `JenkinsFiles`), you need to define a new "Node" for the project.
@@ -244,7 +253,9 @@ To do this, you need to configure Jenkins and perform the following steps:
    - Remote root directory: Path to this directory on the agent (example: "C:\Program Files (x86)\Jenkins").
    - Launch method: Select "Launch agent via Java Web Start".
      - If this option isn't available: Go to *"Manage Jenkins"* → *"Configure Global Security"* and enable the "TCP port of JNLP agents" option.
-  
+     
+Note: When using Node, Jenkins uses the credentials (including password) that configured on this node.
+ 
 **Connect agent to Jenkins:** (This step must be performed every time you log in to Jenkins, otherwise you can not run the jobs that use this node)
 1. From the Jenkins main page, go to *"Manage Jenkins"* → *"Manage Nodes"*.
 2. Click on the newly created slave machine (our Node "SoanrQubeNode") and follow the instructions.  
@@ -268,7 +279,7 @@ To do this, you need to configure Jenkins and perform the following steps:
    - Under *"Pipeline"*:
      - Definition: Select "Pipeline script from SCM".
      - SCM: Select "Git".
-     - Repositories: Under "Repository URL" enter "${GIT_URL}" and fill "Credentials" if necessary.
+     - Repositories: Under "Repository URL" enter "${GIT_URL}". If this repository requires a password to access it - fill also "Credentials".
      - Branches to build: Under "Branch Specifier" enter "${BRANCH_NAME}".
      - Script Path: Enter "JenkinsFiles/ourJenkinsfile", where "ourJenkinsfile" is the JenkinsFile that corresponds to the current job.
      - Don't select "Lightweight checkout".
@@ -300,6 +311,8 @@ Note: You do not have to include the `vars` folder in your project - when you de
 
 #### *Description:*
 Export Quality Profiles *from* SonarQube *to* the folder that the `PROFILES_DIRECTORY` parameter represents.
+
+When this operation ends successfully: The relevant files are pushed to Git with the following commit message: "Sonar profiles changes". If you want to change the commit message - update the stage called "push gate to repository" in the JenkinsFile that is relevant to this job.
 
 This operation has 2 options:
 1. Export all Quality Profiles that associated with a specific project.
@@ -341,6 +354,8 @@ This operation has 2 options depending on the authentication method:
 
 #### *Description:*
 Export Quality Gate *from* SonarQube *to* the folder that the `GATES_DIRECTORY` parameter represents.    
+
+When this operation ends successfully: The relevant file is pushed to Git with the following commit message: "Sonar gates changes". If you want to change the commit message - update the stage called "push gate to repository" in the JenkinsFile that is relevant to this job.
 
 This operation has one option: Export specific Quality Gate given its name.
   
